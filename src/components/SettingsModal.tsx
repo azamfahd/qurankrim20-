@@ -24,6 +24,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   lastSynced
 }) => {
   const [localSettings, setLocalSettings] = useState<UserSettings>({ ...settings });
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const handleSave = () => {
     onSave(localSettings);
@@ -117,10 +118,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     </button>
                     <button 
                       onClick={async () => {
-                        try {
-                          await SupabaseService.signOut();
-                        } catch (err) {
-                          console.error(err);
+                        if (window.confirm('هل أنت متأكد من رغبتك في تسجيل الخروج؟')) {
+                          try {
+                            await SupabaseService.signOut();
+                            onShowToast('تم تسجيل الخروج بنجاح', 'success');
+                          } catch (err: any) {
+                            console.error(err);
+                            onShowToast('فشل تسجيل الخروج', 'error');
+                          }
                         }
                       }}
                       className="py-2.5 px-4 rounded-2xl border border-red-100 text-red-500 text-xs font-bold hover:bg-red-50 transition-all flex items-center justify-center gap-2"
@@ -136,16 +141,27 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <p className="text-xs text-gray-600 leading-relaxed">قم بتسجيل الدخول لمزامنة إعداداتك، محفوظاتك، وتاريخ محادثاتك عبر جميع أجهزتك.</p>
                   <button 
                     onClick={async () => {
+                      if (isLoggingIn) return;
+                      setIsLoggingIn(true);
                       try {
                         await SupabaseService.signInWithGoogle();
-                      } catch (err) {
+                        // The page will redirect, so we don't necessarily need to set isLoggingIn(false) here
+                        // but it's good practice in case it returns without redirecting
+                      } catch (err: any) {
                         console.error(err);
+                        onShowToast(err.message || 'فشل تسجيل الدخول باستخدام Google', 'error');
+                        setIsLoggingIn(false);
                       }
                     }}
-                    className="w-full py-3.5 px-4 rounded-2xl bg-white border border-[var(--color-border)] text-gray-700 text-sm font-bold hover:bg-gray-50 transition-all flex items-center justify-center gap-3 shadow-sm"
+                    disabled={isLoggingIn}
+                    className="w-full py-3.5 px-4 rounded-2xl bg-white border border-[var(--color-border)] text-gray-700 text-sm font-bold hover:bg-gray-50 transition-all flex items-center justify-center gap-3 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
                   >
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
-                    تسجيل الدخول باستخدام Google
+                    {isLoggingIn ? (
+                      <RefreshCw size={18} className="animate-spin text-[var(--color-primary)]" />
+                    ) : (
+                      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
+                    )}
+                    {isLoggingIn ? 'جاري التحويل...' : 'تسجيل الدخول باستخدام Google'}
                   </button>
 
                   <div className="relative flex items-center py-2">

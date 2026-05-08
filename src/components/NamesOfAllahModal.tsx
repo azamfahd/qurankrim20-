@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Search, BookHeart } from 'lucide-react';
 import { NAMES_OF_ALLAH } from '../data/namesOfAllah';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,11 +10,22 @@ interface NamesOfAllahModalProps {
 
 export const NamesOfAllahModal: React.FC<NamesOfAllahModalProps> = ({ isOpen, onClose }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+
+  useEffect(() => {
+    const timerId = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
+
+    return () => {
+      clearTimeout(timerId);
+    };
+  }, [searchTerm]);
 
   const filteredNames = NAMES_OF_ALLAH.filter(name => 
-    name.name.includes(searchTerm) || 
-    name.meaning.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    name.transliteration.toLowerCase().includes(searchTerm.toLowerCase())
+    name.name.includes(debouncedSearchTerm) || 
+    name.meaning.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+    name.transliteration.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
   );
 
   return (

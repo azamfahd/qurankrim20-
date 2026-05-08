@@ -126,6 +126,7 @@ export class SupabaseService {
           model: settings.model,
           creativity_level: settings.creativityLevel,
           reciter: settings.reciter,
+          api_key: settings.apiKey,
           bookmarks: settings.bookmarks || [],
           location: settings.location || null,
           last_updated: settings.lastUpdated || new Date().toISOString()
@@ -154,7 +155,8 @@ export class SupabaseService {
         email: data.email,
         model: data.model,
         creativityLevel: data.creativity_level,
-        reciter: data.reciter,
+        reciter: data.reciter || 'ar.alafasy',
+        apiKey: data.api_key,
         bookmarks: typeof data.bookmarks === 'string' ? JSON.parse(data.bookmarks) : (data.bookmarks || []),
         location: typeof data.location === 'string' ? JSON.parse(data.location) : (data.location || undefined),
         lastUpdated: data.last_updated
@@ -227,11 +229,22 @@ export class SupabaseService {
 
       if (error) throw error;
 
-      return data.map(item => ({
-        id: item.id,
-        verse: typeof item.verse === 'string' ? JSON.parse(item.verse) : item.verse,
-        dateAdded: item.date_added,
-      }));
+      return data.map(item => {
+        let parsedVerse = item.verse;
+        if (typeof item.verse === 'string') {
+          try {
+            parsedVerse = JSON.parse(item.verse);
+          } catch (e) {
+            console.error('Error parsing verse JSON:', e);
+          }
+        }
+        
+        return {
+          id: item.id,
+          verse: parsedVerse,
+          dateAdded: item.date_added,
+        };
+      });
     } catch (error) {
       console.error('Error fetching bookmarks:', error);
       return [];

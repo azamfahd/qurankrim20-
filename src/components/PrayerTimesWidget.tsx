@@ -14,15 +14,15 @@ export const PrayerTimesWidget: React.FC<PrayerTimesWidgetProps> = ({ settings, 
 
   // Use location from settings or default to Makkah
   useEffect(() => {
-    const latitude = settings.location?.latitude ?? 21.4225;
-    const longitude = settings.location?.longitude ?? 39.8262;
+    const latitude = settings?.location?.latitude ?? 21.4225;
+    const longitude = settings?.location?.longitude ?? 39.8262;
     
     const coords = new Coordinates(latitude, longitude);
     const params = CalculationMethod.MuslimWorldLeague();
     const date = new Date();
     const times = new PrayerTimes(coords, date, params);
     setPrayerTimes(times);
-  }, [settings.location]);
+  }, [settings?.location]);
 
   const requestLocation = async () => {
     setIsLoadingLocation(true);
@@ -66,7 +66,7 @@ export const PrayerTimesWidget: React.FC<PrayerTimesWidgetProps> = ({ settings, 
     { name: 'العشاء', time: formatTime(prayerTimes.isha) },
   ];
 
-  const currentLocationName = settings.location?.name || 'مكة المكرمة';
+  const currentLocationName = settings?.location?.name || 'مكة المكرمة';
 
   return (
     <div className="bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-dark)] rounded-3xl p-6 text-white shadow-lg border border-white/10 relative overflow-hidden group h-full flex flex-col justify-between">

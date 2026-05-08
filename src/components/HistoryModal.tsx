@@ -20,12 +20,13 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
   onDeleteSession,
   onClearAll
 }) => {
-  const formatDate = (timestamp: number) => {
+  const formatDate = (timestamp: number | string | undefined) => {
+    if (!timestamp) return '';
     return new Intl.DateTimeFormat('ar-SA', {
       day: 'numeric',
       month: 'short',
       year: 'numeric'
-    }).format(new Date(timestamp));
+    }).format(new Date(typeof timestamp === 'string' ? parseInt(timestamp, 10) : timestamp));
   };
 
   return (

@@ -19,11 +19,12 @@ export const BookmarksModal: React.FC<BookmarksModalProps> = ({
   bookmarks, 
   onRemoveBookmark,
   isOnline,
-  reciter = 'ar.alafasy',
+  reciter,
   onShowToast
 }) => {
   const [playingId, setPlayingId] = React.useState<string | null>(null);
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
+  const activeReciter = reciter || 'ar.alafasy';
 
   React.useEffect(() => {
     return () => {
@@ -86,7 +87,7 @@ export const BookmarksModal: React.FC<BookmarksModalProps> = ({
         audio.onerror = async () => {
           console.error("Audio error for URL:", url);
           if (!isRetry) {
-            const fallbackUrl = await getAudioUrl(reciter, bookmark.verse.surahNumber, bookmark.verse.ayahNumber, true);
+            const fallbackUrl = await getAudioUrl(activeReciter, bookmark.verse.surahNumber, bookmark.verse.ayahNumber, true);
             if (fallbackUrl && fallbackUrl !== url) {
               console.log("Retrying with fallback URL:", fallbackUrl);
               playWithUrl(fallbackUrl, true);
@@ -106,7 +107,7 @@ export const BookmarksModal: React.FC<BookmarksModalProps> = ({
         }
       };
 
-      const initialUrl = await getAudioUrl(reciter, bookmark.verse.surahNumber, bookmark.verse.ayahNumber);
+      const initialUrl = await getAudioUrl(activeReciter, bookmark.verse.surahNumber, bookmark.verse.ayahNumber);
       if (!initialUrl) {
         onShowToast("عذراً، لم نتمكن من العثور على رابط التلاوة لهذا القارئ.", 'error');
         return;

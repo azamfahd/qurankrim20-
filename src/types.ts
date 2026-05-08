@@ -15,9 +15,10 @@ export interface UserSettings {
   showTranslation?: boolean;
   username?: string;
   email?: string;
+  photoURL?: string;
   creativityLevel?: number;
   reciter?: string;
-  lastUpdated?: number;
+  lastUpdated?: number | string;
   apiKey?: string;
   bookmarks?: Bookmark[];
   isLoggedIn?: boolean;
@@ -33,6 +34,7 @@ export interface Verse {
   surahNumber?: number;
   ayahNumber?: number;
   tafsir?: string;
+  tadabbur?: string;
   translation?: string;
 }
 

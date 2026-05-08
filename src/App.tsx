@@ -38,7 +38,8 @@ const DEFAULT_SETTINGS: UserSettings = {
   model: 'gemini-3-flash-preview', 
   creativityLevel: 0.5,
   apiKey: '',
-  bookmarks: []
+  bookmarks: [],
+  reciter: 'ar.alafasy'
 };
 
 // Generate a unique user ID for anonymous users
@@ -469,7 +470,18 @@ const App: React.FC = () => {
 
     try {
       const displayName = settings.username || (settings.email ? settings.email.split('@')[0] : undefined);
-      const data = await chatSessionRef.current.sendMessage(text, displayName);
+      
+      const onProgressUpdate = (stage: string) => {
+        const messagesMap: Record<string, string> = {
+          'thinking': "نستلهم الحكمة من فيض الوحي لقلبك...",
+          'mapping': "نغوص في أعماق آيات الذكر الحكيم...",
+          'verifying': "نتثبّت من مرجعيات الآيات وسياقها...",
+          'formatting': "نجلو لك المعاني في أبهى صورها..."
+        };
+        setLoadingText(messagesMap[stage] || LOADING_MESSAGES[0]);
+      };
+
+      const data = await chatSessionRef.current.sendMessage(text, displayName, messages, onProgressUpdate);
       const aiMsg: ChatMessage = { id: generateId(), type: 'ai', data: data };
       const finalMessages = [...newMessages, aiMsg];
       setMessages(finalMessages);
@@ -812,6 +824,8 @@ const App: React.FC = () => {
       <QiblaModal
         isOpen={isQiblaOpen}
         onClose={() => setIsQiblaOpen(false)}
+        settings={settings}
+        onUpdateSettings={setSettings}
       />
 
       <ZakatCalculatorModal

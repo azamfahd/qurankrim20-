@@ -1,5 +1,5 @@
-import { GoogleGenAI, GenerateContentResponse, Type } from "@google/genai";
-import { QuranResponse, UserSettings, Verse } from '../types';
+import { GoogleGenAI, GenerateContentResponse, Type, ThinkingLevel } from "@google/genai";
+import { QuranResponse, UserSettings, Verse, ChatMessage } from '../types';
 import { QuranDataService } from './quranDataService';
 
 export class QuranChatSession {
@@ -18,9 +18,7 @@ export class QuranChatSession {
     }
     
     let selectedModel = settings.model || settings.geminiModel || 'gemini-3-flash-preview';
-    if ((selectedModel as string).includes('1.5') || (selectedModel as string) === 'gemini-pro' || (selectedModel as string) === 'gemini-3.1-flash-preview') {
-      selectedModel = 'gemini-3-flash-preview';
-    }
+    // Remove the restriction that forces gemini-3-flash-preview
     this.model = selectedModel;
   }
 
@@ -143,10 +141,18 @@ export class QuranChatSession {
     return randomFallback;
   }
 
-  async sendMessage(userMessage: string, username?: string): Promise<QuranResponse> {
+  async sendMessage(
+    userMessage: string, 
+    username?: string, 
+    history?: ChatMessage[],
+    onProgress?: (stage: 'thinking' | 'mapping' | 'verifying' | 'formatting') => void
+  ): Promise<QuranResponse> {
     if (!this.ai || !this.apiKey) {
+      if (onProgress) onProgress('thinking');
       return this.getOfflineFallbackResponse(userMessage, username);
     }
+
+    if (onProgress) onProgress('thinking');
 
     const responseSchema = {
       type: Type.OBJECT,
@@ -192,6 +198,9 @@ export class QuranChatSession {
       You act as a "Master of Quranic Semantics" and an "Expert Spiritual Analyst". You do NOT generate the Arabic text of the Quran yourself. 
       Your primary task is to perform an exceptionally deep, intelligent exploration of the user's prompt, deconstruct their core need or question, and map it to the MOST relevant Surah and Ayah numbers with profound explanations.
       
+      CONVERSATIONAL CONTEXT:
+      You are engaging in a continuous conversation. The user may ask follow-up questions, ask for clarifications, or expand on their previous thoughts. ALWAYS analyze the user's prompt in the context of the previous messages. If the user says "وضح أكثر" (explain more) or "وماذا عن كذا" (what about...), refer back to your previous answer and build upon it seamlessly.
+
       OUT OF SCOPE QUESTIONS:
       If the user asks a question completely unrelated to the Quran, spirituality, emotions, life guidance, or Islamic principles, politely apologize and explain your specific role.
       Fill the JSON response as follows:
@@ -224,6 +233,20 @@ export class QuranChatSession {
       - **IMPORTANT FORMATTING (HIGHLIGHTING THE CORE)**: Do NOT highlight single scattered keywords. Instead, use Markdown bold (**text**) exclusively to highlight the **core sentence, the main concluding thought, or the absolute essence of the topic (لب الموضوع والزبدة)** in each section (introMessage, tafsir, tadabbur, tafakkur, summary). The goal is that if the user reads ONLY the highlighted text, they will completely understand the main point and summary of the response.
     `;
 
+    const contents: any[] = [];
+    
+    if (history && history.length > 0) {
+      for (const msg of history) {
+        if (msg.type === 'user') {
+          contents.push({ role: 'user', parts: [{ text: msg.content }] });
+        } else if (msg.type === 'ai' && msg.data) {
+          contents.push({ role: 'model', parts: [{ text: JSON.stringify(msg.data) }] });
+        }
+      }
+    }
+    
+    contents.push({ role: 'user', parts: [{ text: userMessage }] });
+
     let response: GenerateContentResponse | null = null;
     let lastError: any = null;
     const maxRetries = 3;
@@ -232,12 +255,15 @@ export class QuranChatSession {
       try {
         response = await this.ai.models.generateContent({
           model: this.model,
-          contents: userMessage,
+          contents: contents,
           config: {
             systemInstruction,
             responseMimeType: "application/json",
             responseSchema,
             temperature: this.settings.creativityLevel ?? 0.5,
+            thinkingConfig: {
+              thinkingLevel: this.model.includes('pro') ? ThinkingLevel.HIGH : ThinkingLevel.LOW
+            }
           },
         });
         break; // Success, exit retry loop
@@ -252,10 +278,13 @@ export class QuranChatSession {
         
         // Wait before retrying (exponential backoff: 1s, 2s, 4s)
         if (attempt < maxRetries - 1) {
+          if (onProgress) onProgress('thinking');
           await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
         }
       }
     }
+
+    if (onProgress) onProgress('mapping');
 
     if (!response) {
       throw lastError || new Error("فشل الاتصال بالخادم بعد عدة محاولات.");
@@ -265,21 +294,60 @@ export class QuranChatSession {
       throw new Error("تم حظر الاستجابة بسبب سياسات الأمان أو لم يتم إرجاع محتوى.");
     }
 
-    let text = response.text;
+    let text = "";
+    try {
+      // Try to get text from the response object
+      text = response.text;
+    } catch (e) {
+      // Fallback if .text is a function or fails
+      try {
+        if (typeof (response as any).text === 'function') {
+          text = (response as any).text();
+        }
+      } catch (e2) {
+        console.error("Failed to extract text from Gemini response", e2);
+      }
+    }
+
+    if (!text) {
+      // Deep check of candidates
+      const candidate = response.candidates[0];
+      if (candidate.content && candidate.content.parts && candidate.content.parts.length > 0) {
+        text = candidate.content.parts[0].text || "";
+      }
+    }
+
     if (!text) throw new Error("استجابة فارغة من الخادم.");
     
-    const firstBrace = text.indexOf('{');
-    const lastBrace = text.lastIndexOf('}');
+    // Clean the text from markdown code blocks if present
+    let cleanedText = text.trim();
+    if (cleanedText.startsWith("```json")) {
+      cleanedText = cleanedText.substring(7);
+    } else if (cleanedText.startsWith("```")) {
+      cleanedText = cleanedText.substring(3);
+    }
     
-    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-      text = text.substring(firstBrace, lastBrace + 1);
+    if (cleanedText.endsWith("```")) {
+      cleanedText = cleanedText.substring(0, cleanedText.length - 3);
+    }
+    
+    cleanedText = cleanedText.trim();
+
+    const firstBrace = cleanedText.indexOf('{');
+    const lastBrace = cleanedText.lastIndexOf('}');
+    
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace >= firstBrace) {
+      cleanedText = cleanedText.substring(firstBrace, lastBrace + 1);
     } else {
+      console.error("Invalid JSON format received:", text);
       throw new Error("لم يتم العثور على استجابة صالحة (تنسيق غير متوقع).");
     }
     
     try {
-      const aiResult = JSON.parse(text);
+      const aiResult = JSON.parse(cleanedText);
       
+      if (onProgress) onProgress('verifying');
+
       // VERIFICATION LAYER: Fetch actual Quranic text from verified API
       const verifiedVerses: Verse[] = await Promise.all(
         (aiResult.verseMappings || []).map(async (mapping: any) => {
@@ -307,6 +375,8 @@ export class QuranChatSession {
           }
         })
       ).then(results => results.filter(v => v !== null) as Verse[]);
+
+      if (onProgress) onProgress('formatting');
 
       return {
         title: aiResult.title,

@@ -43,10 +43,11 @@ const VerseSection: React.FC<{
   onToggleBookmark: (verse: Verse) => void,
   reciter?: string,
   onShowToast: (message: string, type?: 'success' | 'error' | 'info') => void;
-}> = ({ verse, index, isOnline, isBookmarked, onToggleBookmark, reciter = 'ar.alafasy', onShowToast }) => {
+}> = ({ verse, index, isOnline, isBookmarked, onToggleBookmark, reciter, onShowToast }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeTab, setActiveTab] = useState<'tafsir' | 'tadabbur'>('tafsir');
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const activeReciter = reciter || 'ar.alafasy';
 
   useEffect(() => {
     return () => {
@@ -106,7 +107,7 @@ const VerseSection: React.FC<{
           audio.onerror = async () => {
             console.error("Audio error for URL:", url);
             if (!isRetry) {
-              const fallbackUrl = await getAudioUrl(reciter, verse.surahNumber, verse.ayahNumber, true);
+              const fallbackUrl = await getAudioUrl(activeReciter, verse.surahNumber, verse.ayahNumber, true);
               if (fallbackUrl && fallbackUrl !== url) {
                 console.log("Retrying with fallback URL:", fallbackUrl);
                 playWithUrl(fallbackUrl, true);
@@ -134,7 +135,7 @@ const VerseSection: React.FC<{
           }
         };
 
-        const initialUrl = await getAudioUrl(reciter, verse.surahNumber, verse.ayahNumber);
+        const initialUrl = await getAudioUrl(activeReciter, verse.surahNumber, verse.ayahNumber);
         if (!initialUrl) {
           onShowToast("عذراً، لم نتمكن من العثور على رابط التلاوة لهذا القارئ.", 'error');
           return;
@@ -300,12 +301,31 @@ export const ResultCard: React.FC<{
         <div className="p-6 sm:p-8 md:p-12 border-b border-gray-100 bg-gradient-to-b from-[var(--color-primary-light)]/20 to-transparent relative">
           <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--color-gold)]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
 
+          <div className="flex justify-between items-center mb-6 relative z-10">
+            <div className="flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 rounded-full border border-green-100 shadow-sm animate-fade-in">
+              <Check size={14} />
+              <span className="text-[10px] font-black uppercase tracking-wider">آيات موثقة ومحققة</span>
+            </div>
+            
+            <button 
+              onClick={() => {
+                const fullText = `${data.title}\n\n${data.introMessage}\n\n${(data.verses || []).map(v => `${v.arabicText} (${v.surahName} : ${v.ayahNumber})\n\nالتفسير: ${v.tafsir}\n\nالتدبر: ${v.tadabbur}`).join('\n\n---\n\n')}\n\nالخلاصة: ${data.summary}\n\n- تم بواسطة تطبيق أنيس القلوب`;
+                navigator.clipboard.writeText(fullText);
+                onShowToast('تم نسخ التحليل الكامل للمشاركة', 'success');
+              }}
+              className="flex items-center gap-2 px-4 py-2 bg-white/80 hover:bg-white text-[var(--color-primary)] rounded-xl border border-gray-100 shadow-sm transition-all hover:scale-105 active:scale-95 text-xs font-bold"
+            >
+              <Copy size={14} />
+              <span>نسخ الإجابة كاملة</span>
+            </button>
+          </div>
+
           <div className="relative z-10 bg-white/60 backdrop-blur-sm p-5 sm:p-6 md:p-8 rounded-2xl md:rounded-3xl border border-white shadow-sm">
             <div className="flex items-center gap-3 mb-3 sm:mb-4">
                <div className="p-2 bg-[var(--color-gold)]/10 rounded-xl text-[var(--color-gold-dark)]">
                  <Info size={20} />
                </div>
-               <span className="text-sm font-bold text-gray-800">رسالة مخصصة لك</span>
+               <span className="text-sm font-bold text-gray-800">تحليل الحالة والرسالة</span>
             </div>
             <p className="explanation-text text-gray-800 text-base sm:text-lg leading-relaxed text-justify font-medium">
                {renderHighlightedText(data.introMessage)}

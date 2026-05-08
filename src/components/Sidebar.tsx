@@ -213,7 +213,7 @@ const SidebarItem = ({ icon, label, onClick, primary = false }: { icon: React.Re
     onClick={onClick}
   >
     <div className={`p-2.5 rounded-xl transition-all duration-300 ${primary ? 'bg-white/20 text-white' : 'bg-[var(--color-gold)]/10 text-[var(--color-gold-dark)] group-hover:bg-gradient-to-br group-hover:from-[var(--color-gold)] group-hover:to-[var(--color-gold-dark)] group-hover:text-white group-hover:shadow-md'}`}>
-      {React.cloneElement(icon as React.ReactElement, { size: 20 })}
+      {React.cloneElement(icon as React.ReactElement<any>, { size: 20 })}
     </div>
     <span className="font-black text-sm tracking-wide">{label}</span>
   </button>
