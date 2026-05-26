@@ -41,22 +41,22 @@ export const DailyVerse: React.FC = () => {
   };
 
   return (
-    <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 shadow-lg border border-white/40 relative overflow-hidden group hover:shadow-xl transition-all duration-700 h-full flex flex-col justify-between">
+    <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-5 shadow-lg border border-white/40 relative overflow-hidden group hover:shadow-xl transition-all duration-700 h-full flex flex-col justify-between">
       <div className="absolute top-0 right-0 w-1.5 h-full bg-gradient-to-b from-[var(--color-gold)] to-[var(--color-gold-dark)]"></div>
       
-      <div className="flex items-center justify-between mb-6 relative z-10">
-        <div className="flex items-center gap-3 text-[var(--color-gold-dark)]">
-          <div className="p-2 bg-gradient-to-br from-[var(--color-gold)]/20 to-[var(--color-gold-dark)]/20 rounded-xl border border-[var(--color-gold)]/20 shadow-inner group-hover:scale-110 transition-transform duration-500">
-            <BookOpen size={20} className="text-[var(--color-gold-dark)]" />
+      <div className="flex items-center justify-between mb-4 relative z-10">
+        <div className="flex items-center gap-2.5 text-[var(--color-gold-dark)]">
+          <div className="p-1.5 bg-gradient-to-br from-[var(--color-gold)]/20 to-[var(--color-gold-dark)]/20 rounded-xl border border-[var(--color-gold)]/20 shadow-inner group-hover:scale-105 transition-transform duration-500">
+            <BookOpen size={18} className="text-[var(--color-gold-dark)]" />
           </div>
-          <h3 className="font-bold text-lg">آية وتأمل</h3>
+          <h3 className="font-bold text-base text-gray-900">آية وتأمل</h3>
         </div>
         <button 
           onClick={refreshVerse}
-          className={`p-2 text-[var(--color-gold-dark)] hover:bg-[var(--color-gold)]/10 rounded-xl transition-all shadow-sm border border-transparent hover:border-[var(--color-gold)]/20 ${isRefreshing ? 'animate-spin' : ''}`}
+          className={`p-1.5 text-[var(--color-gold-dark)] hover:bg-[var(--color-gold)]/10 rounded-xl transition-all shadow-sm border border-transparent hover:border-[var(--color-gold)]/20 ${isRefreshing ? 'animate-spin' : ''}`}
           title="آية أخرى"
         >
-          <RefreshCw size={18} />
+          <RefreshCw size={16} />
         </button>
       </div>
 
@@ -67,14 +67,14 @@ export const DailyVerse: React.FC = () => {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.98, y: -10 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="flex flex-col items-center relative z-10"
+          className="flex flex-col items-center relative z-10 my-1"
         >
-          <p className="text-2xl md:text-3xl font-bold leading-[1.8] text-center text-gray-900 mb-6 px-2 quran-text drop-shadow-sm tracking-normal">
+          <p className="text-base sm:text-lg md:text-xl font-bold leading-[1.8] text-center text-gray-900 mb-4 px-1 quran-text drop-shadow-sm tracking-normal">
             "{verse.text}"
           </p>
-          <div className="flex items-center gap-3 text-sm font-bold text-[var(--color-gold-dark)] bg-[var(--color-gold)]/5 px-4 py-2 rounded-xl border border-[var(--color-gold)]/20 shadow-sm">
+          <div className="flex items-center gap-2.5 text-[11px] font-black text-[var(--color-gold-dark)] bg-[var(--color-gold)]/5 px-3 py-1.5 rounded-xl border border-[var(--color-gold)]/20 shadow-sm">
             <span className="font-outfit">سورة {verse.surah}</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-gold)]"></span>
+            <span className="w-1 h-1 rounded-full bg-[var(--color-gold)]"></span>
             <span className="font-outfit">الآية {verse.ayah}</span>
           </div>
         </motion.div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Settings, History, PlusCircle, X, User, Heart, Bookmark as BookmarkIcon, SunMoon, BookOpenText, Share2, Compass, Calculator, Download, MonitorCheck } from 'lucide-react';
+import { Settings, History, PlusCircle, X, User, Heart, Bookmark as BookmarkIcon, SunMoon, BookOpenText, Share2, Compass, Calculator, Download, MonitorCheck, Calendar } from 'lucide-react';
 import { UserSettings } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -15,6 +15,7 @@ interface SidebarProps {
   onOpenNamesOfAllah: () => void;
   onOpenQibla: () => void;
   onOpenZakat: () => void;
+  onOpenHijri: () => void;
   userInfo: UserSettings;
   onShowToast: (message: string, type?: 'success' | 'error' | 'info') => void;
 }
@@ -31,6 +32,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenNamesOfAllah,
   onOpenQibla,
   onOpenZakat,
+  onOpenHijri,
   userInfo,
   onShowToast
 }) => {
@@ -142,6 +144,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 icon={<Calculator size={20} />} 
                 label="حاسبة الزكاة" 
                 onClick={() => { onOpenZakat(); onClose(); }} 
+              />
+
+              <SidebarItem 
+                icon={<Calendar size={20} />} 
+                label="التقويم الهجري" 
+                onClick={() => { onOpenHijri(); onClose(); }} 
               />
 
               <SidebarItem 

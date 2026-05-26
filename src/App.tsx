@@ -13,6 +13,8 @@ import { Toast, ToastType } from './components/Toast';
 import { Sidebar } from './components/Sidebar';
 import { DailyVerse } from './components/DailyVerse';
 import { PrayerTimesWidget } from './components/PrayerTimesWidget';
+import { HijriCalendarModal } from './components/HijriCalendarModal';
+import { getCurrentHijriDate, getHijriReminders } from './utils/hijri';
 import { QiblaModal } from './components/QiblaModal';
 import { ZakatCalculatorModal } from './components/ZakatCalculatorModal';
 import { InstallPrompt } from './components/InstallPrompt';
@@ -20,7 +22,7 @@ import { QuranChatSession } from './services/geminiService';
 import { SupabaseService } from './services/supabaseService';
 import { SyncService } from './services/syncService';
 import { ChatMessage, AppState, UserSettings, ChatSession, Bookmark, Verse } from './types';
-import { AlertCircle, Plus, Menu, ArrowRight, WifiOff, BookOpen, Key, X, Compass, Calculator, Bookmark as BookmarkIcon, RefreshCw } from 'lucide-react';
+import { AlertCircle, Plus, Menu, ArrowRight, ArrowLeft, WifiOff, BookOpen, Key, X, Compass, Calculator, Bookmark as BookmarkIcon, RefreshCw, Calendar, Sparkles, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const LOADING_MESSAGES = [
@@ -90,6 +92,18 @@ const App: React.FC = () => {
   const [isNamesOfAllahOpen, setIsNamesOfAllahOpen] = useState(false);
   const [isQiblaOpen, setIsQiblaOpen] = useState(false);
   const [isZakatOpen, setIsZakatOpen] = useState(false);
+  const [isHijriOpen, setIsHijriOpen] = useState(false);
+  const [hijriOffset, setHijriOffset] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('anis_hijri_offset');
+      return saved ? parseInt(saved, 10) : 0;
+    } catch {
+      return 0;
+    }
+  });
+
+  const todayHijri = getCurrentHijriDate(hijriOffset);
+  const todayReminders = getHijriReminders(todayHijri);
   const [loadingText, setLoadingText] = useState(LOADING_MESSAGES[0]);
 
   const [isSyncing, setIsSyncing] = useState(false);
@@ -573,23 +587,25 @@ const App: React.FC = () => {
           <motion.div 
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="glass-panel border-b border-white/10 shadow-lg" 
-            style={{ 
-              position: 'sticky', top: 0, zIndex: 30,
-              padding: '0.75rem 1.25rem',
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              transition: 'top 0.3s'
-            }}
+            className="sticky top-0 z-40 bg-white/10 backdrop-blur-xl border-b border-white/10 px-4 py-3 flex items-center justify-between shadow-lg"
           >
-             <div className="flex items-center gap-3">
-               <button onClick={startNewChat} className="btn-ghost btn-icon text-white hover:bg-white/10" style={{ width: 36, height: 36 }} title="الرئيسية">
-                 <ArrowRight size={20} />
+             <div className="flex items-center gap-4">
+               <button 
+                 onClick={startNewChat} 
+                 className="p-2.5 bg-white/10 hover:bg-white/20 text-white rounded-2xl transition-all shadow-sm border border-white/10 flex items-center justify-center" 
+                 title="الرئيسية"
+               >
+                 <ArrowRight size={22} />
                </button>
-               <div className="flex items-center gap-2">
-                 <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-[var(--color-gold)] to-[var(--color-gold-dark)] flex items-center justify-center text-white shadow-lg">
-                    <BookOpen size={18} />
+               <div className="flex flex-col">
+                 <div className="flex items-center gap-2">
+                   <BookOpen size={16} className="text-[var(--color-gold)] animate-pulse" />
+                   <h1 className="text-xl font-black royal-text-gradient leading-tight tracking-tight">أنيس القلوب</h1>
                  </div>
-                 <h1 className="royal-text-gradient font-black text-lg">أنيس القلوب</h1>
+                 <div className="flex items-center gap-1.5 text-[10px] text-[var(--color-gold-light)] font-semibold mt-0.5 opacity-80">
+                   <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-gold)] animate-pulse"></span>
+                   <span>محادثة نشطة</span>
+                 </div>
                </div>
              </div>
              
@@ -601,14 +617,30 @@ const App: React.FC = () => {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.8 }}
                       className="flex items-center gap-1.5 px-2 py-1 bg-white/10 rounded-full border border-white/10"
+                      title="جاري المزامنة..."
                     >
-                      <RefreshCw size={10} className="text-[var(--color-gold)] animate-spin" />
-                      <span className="text-[8px] text-white/70 font-bold">مزامنة</span>
+                      <RefreshCw size={12} className="text-[var(--color-gold)] animate-spin" />
+                      <span className="text-[9px] text-white/70 font-bold">مزامنة</span>
                     </motion.div>
                   )}
                 </AnimatePresence>
-                <button onClick={() => setIsSidebarOpen(true)} className="btn-ghost btn-icon text-white hover:bg-white/10" style={{ width: 36, height: 36 }}>
-                  <Menu size={20} />
+
+                <button 
+                  onClick={() => setIsSettingsOpen(true)}
+                  className="group flex items-center gap-3 pl-2 pr-1 py-1 bg-white/10 hover:bg-white/20 border border-white/10 rounded-full transition-all shadow-sm hover:shadow-md"
+                >
+                  <span className="text-sm font-bold text-white group-hover:text-[var(--color-gold-light)] transition-colors hidden sm:block pr-2">{settings.username || 'ضيف'}</span>
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[var(--color-gold)] to-[var(--color-gold-dark)] border border-white/20 flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform">
+                    <User size={18} />
+                  </div>
+                </button>
+
+                <button 
+                  onClick={() => setIsSidebarOpen(true)} 
+                  className="p-2.5 bg-white/10 hover:bg-white/20 text-white rounded-2xl transition-all shadow-sm border border-white/10 flex items-center justify-center"
+                  aria-label="القائمة"
+                >
+                  <Menu size={22} />
                 </button>
              </div>
           </motion.div>
@@ -692,32 +724,60 @@ const App: React.FC = () => {
 
           {!isChatStarted && state !== AppState.LOADING && (
              <div className="mt-4 w-full animate-slide-up">
-               <div className="mb-8 text-center relative">
+               {/* Hijri Banner Alert */}
+               <div 
+                 onClick={() => setIsHijriOpen(true)}
+                 className="mb-8 mx-auto max-w-2xl bg-white/5 backdrop-blur-md border border-white/10 hover:border-[var(--color-gold)]/30 hover:bg-white/10 rounded-2xl p-3.5 flex items-center justify-between gap-4 cursor-pointer text-right group transition-all duration-300 shadow-[0_5px_20px_rgba(0,0,0,0.05)] select-none animate-pulse-subtle"
+               >
+                 <div className="flex items-center gap-3">
+                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-gold)]/20 to-[var(--color-gold)]/5 border border-[var(--color-gold)]/15 flex items-center justify-center text-[var(--color-gold)]">
+                     <Calendar size={18} className="group-hover:scale-110 transition-transform duration-300" />
+                   </div>
+                   <div className="space-y-0.5">
+                     <span className="text-[9px] uppercase font-bold text-[var(--color-gold)] tracking-wider block">التقويم الهجري اليومي</span>
+                     <span className="text-xs font-black text-white">{todayHijri.formattedAr}</span>
+                   </div>
+                 </div>
+
+                 {todayReminders.length > 0 ? (
+                   <div className="flex-1 hidden sm:flex items-center gap-2 justify-end text-right">
+                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                     <span className="text-[11px] font-bold text-slate-100 line-clamp-1">
+                       {todayReminders[0].badge} : {todayReminders[0].title}
+                     </span>
+                   </div>
+                 ) : (
+                   <div className="flex-1 hidden sm:flex items-center gap-1.5 justify-end text-slate-300 text-[10px] font-bold">
+                     <Sparkles size={11} className="text-[var(--color-gold)]" />
+                     <span>اضغط للأدعية والفضائل اليومية</span>
+                   </div>
+                 )}
+
+                 <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 group-hover:bg-white/10 text-white/50 group-hover:text-white transition-all">
+                   <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform duration-300" />
+                 </div>
+               </div>
+
+               <div className="mb-5 text-center relative">
                  {/* 3D Decorative Element */}
                  <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-40 h-40 opacity-30 pointer-events-none z-0 animate-float-3d perspective-1000">
                     <div className="w-full h-full rounded-full bg-gradient-to-tr from-[var(--color-primary)] to-[var(--color-primary-light)] blur-2xl" style={{ transform: 'rotateX(12deg) rotateY(12deg)' }}></div>
                  </div>
                  
-                 <div className="relative z-10">
-                   <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 leading-tight drop-shadow-md">
-                     {getTimeBasedGreeting()} {settings.username ? `، ${settings.username}` : ''}
-                   </h2>
-                    <p className="text-white/80 text-base font-medium drop-shadow-sm">كيف يمكنني أن أؤنس قلبك اليوم بآيات الله؟</p>
+                 <div className="relative z-10 flex flex-col items-center">
+                   <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[11px] sm:text-xs font-bold text-slate-300 backdrop-blur-md mb-2 shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-gold)] animate-pulse"></span>
+                      {getTimeBasedGreeting()} {settings.username ? `، ${settings.username}` : ''}
+                   </div>
+                    <h2 className="text-base sm:text-lg font-bold text-white tracking-normal leading-relaxed drop-shadow-md">كيف يمكنني أن أؤنس قلبك اليوم بآيات الله؟</h2>
                  </div>
                </div>
 
-               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 my-8">
-                 <PrayerTimesWidget 
-                   settings={settings} 
-                   onUpdateSettings={setSettings} 
-                 />
-                 <DailyVerse />
-               </div>
-
-               <div className="my-12">
+               {/* Primary Core Entry Control - Form & Prompt suggestions */}
+               <div className="mb-6 max-w-3xl mx-auto w-full">
                  <EmotionForm onSubmit={handleEmotionSubmit} isLoading={false} isOnline={isOnline} variant="centered" />
                  
-                 <div className="mt-6 flex flex-wrap justify-center gap-2 max-w-2xl mx-auto px-4">
+                 <div className="mt-3 flex flex-row flex-nowrap overflow-x-auto gap-2 max-w-2xl mx-auto px-4 w-full justify-start md:justify-center no-scrollbar pb-1 snap-x select-none">
                    {[
                      "أشعر بضيق في صدري",
                      "أريد آيات عن الصبر",
@@ -728,12 +788,21 @@ const App: React.FC = () => {
                      <button
                        key={idx}
                        onClick={() => handleEmotionSubmit(prompt)}
-                       className="text-xs font-black px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white hover:border-[var(--color-gold)] hover:text-[var(--color-gold)] transition-all hover:shadow-[0_0_15px_rgba(212,175,55,0.3)] hover:bg-white/20"
+                       className="text-[10px] sm:text-[11px] font-bold px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-white/5 border border-white/10 text-white/90 hover:border-[var(--color-gold)]/60 hover:text-[var(--color-gold)] transition-all duration-300 hover:shadow-[0_0_10px_rgba(197,160,89,0.25)] hover:bg-white/10 active:scale-95 shadow-sm shrink-0 snap-center select-none"
                      >
                        {prompt}
                      </button>
                    ))}
                  </div>
+               </div>
+
+               {/* Professional Status Grid Panels */}
+               <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 my-8">
+                 <PrayerTimesWidget 
+                   settings={settings} 
+                   onUpdateSettings={setSettings} 
+                 />
+                 <DailyVerse />
                </div>
 
                <div className="mt-16 mb-10">
@@ -744,6 +813,12 @@ const App: React.FC = () => {
                  </div>
                  
                  <div className="quick-actions-grid">
+                   <div className="action-card group" onClick={() => setIsHijriOpen(true)}>
+                     <div className="action-card-icon group-hover:scale-110 transition-transform text-[var(--color-gold)]">
+                       <Calendar size={24} />
+                     </div>
+                     <span className="action-card-title">التقويم الهجري</span>
+                   </div>
                    <div className="action-card group" onClick={() => setIsAdhkarOpen(true)}>
                      <div className="action-card-icon group-hover:rotate-12 transition-transform">
                        <BookOpen size={24} />
@@ -790,7 +865,9 @@ const App: React.FC = () => {
           <div className="fixed bottom-0 left-0 right-0 z-40">
              <div style={{ height: '40px', background: 'linear-gradient(to bottom, transparent, var(--color-bg))', pointerEvents: 'none' }}></div>
              <div style={{ background: 'var(--color-bg)', padding: '0 1rem', paddingBottom: 'calc(1rem + var(--safe-area-bottom))' }}>
-               <EmotionForm onSubmit={handleEmotionSubmit} isLoading={state === AppState.LOADING} isOnline={isOnline} variant="bottom" />
+               <div className="max-w-3xl mx-auto w-full">
+                 <EmotionForm onSubmit={handleEmotionSubmit} isLoading={state === AppState.LOADING} isOnline={isOnline} variant="bottom" />
+               </div>
              </div>
           </div>
         )}
@@ -812,6 +889,7 @@ const App: React.FC = () => {
         onOpenNamesOfAllah={() => setIsNamesOfAllahOpen(true)}
         onOpenQibla={() => setIsQiblaOpen(true)}
         onOpenZakat={() => setIsZakatOpen(true)}
+        onOpenHijri={() => setIsHijriOpen(true)}
         userInfo={settings}
         onShowToast={showToast}
       />
@@ -819,6 +897,13 @@ const App: React.FC = () => {
       <TasbihModal 
         isOpen={isTasbihOpen} 
         onClose={() => setIsTasbihOpen(false)} 
+      />
+
+      <HijriCalendarModal
+        isOpen={isHijriOpen}
+        onClose={() => setIsHijriOpen(false)}
+        hijriOffset={hijriOffset}
+        setHijriOffset={setHijriOffset}
       />
 
       <QiblaModal

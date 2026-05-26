@@ -185,6 +185,9 @@ body {
   font-size: 0.875rem;
   font-weight: 700;
   color: var(--color-gold-light);
+  text-align: center;
+  display: block;
+  width: 100%;
 }
 
 .quran-text {
@@ -246,3 +249,13 @@ body {
   50% { transform: translateY(-10px) rotateX(15deg) rotateY(5deg); }
   100% { transform: translateY(0) rotateX(12deg) rotateY(12deg); }
 }
+
+/* Hide scrollbars for smooth scrolling list */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
