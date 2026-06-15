@@ -18,11 +18,12 @@ import { getCurrentHijriDate, getHijriReminders } from './utils/hijri';
 import { QiblaModal } from './components/QiblaModal';
 import { ZakatCalculatorModal } from './components/ZakatCalculatorModal';
 import { InstallPrompt } from './components/InstallPrompt';
+import { AgriculturalCalendarModal } from './components/AgriculturalCalendarModal';
 import { QuranChatSession } from './services/geminiService';
 import { SupabaseService } from './services/supabaseService';
 import { SyncService } from './services/syncService';
 import { ChatMessage, AppState, UserSettings, ChatSession, Bookmark, Verse } from './types';
-import { AlertCircle, Plus, Menu, ArrowRight, ArrowLeft, WifiOff, BookOpen, Key, X, Compass, Calculator, Bookmark as BookmarkIcon, RefreshCw, Calendar, Sparkles, User } from 'lucide-react';
+import { AlertCircle, Plus, Menu, ArrowRight, ArrowLeft, WifiOff, BookOpen, Key, X, Compass, Calculator, Bookmark as BookmarkIcon, RefreshCw, Calendar, Leaf, Sparkles, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const LOADING_MESSAGES = [
@@ -93,6 +94,7 @@ const App: React.FC = () => {
   const [isQiblaOpen, setIsQiblaOpen] = useState(false);
   const [isZakatOpen, setIsZakatOpen] = useState(false);
   const [isHijriOpen, setIsHijriOpen] = useState(false);
+  const [isAgriCalendarOpen, setIsAgriCalendarOpen] = useState(false);
   const [hijriOffset, setHijriOffset] = useState<number>(() => {
     try {
       const saved = localStorage.getItem('anis_hijri_offset');
@@ -141,6 +143,7 @@ const App: React.FC = () => {
         setIsNamesOfAllahOpen(false);
         setIsQiblaOpen(false);
         setIsZakatOpen(false);
+        setIsAgriCalendarOpen(false);
         setIsSidebarOpen(false);
       }
     };
@@ -724,38 +727,12 @@ const App: React.FC = () => {
 
           {!isChatStarted && state !== AppState.LOADING && (
              <div className="mt-4 w-full animate-slide-up">
-               {/* Hijri Banner Alert */}
-               <div 
-                 onClick={() => setIsHijriOpen(true)}
-                 className="mb-8 mx-auto max-w-2xl bg-white/5 backdrop-blur-md border border-white/10 hover:border-[var(--color-gold)]/30 hover:bg-white/10 rounded-2xl p-3.5 flex items-center justify-between gap-4 cursor-pointer text-right group transition-all duration-300 shadow-[0_5px_20px_rgba(0,0,0,0.05)] select-none animate-pulse-subtle"
-               >
-                 <div className="flex items-center gap-3">
-                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-gold)]/20 to-[var(--color-gold)]/5 border border-[var(--color-gold)]/15 flex items-center justify-center text-[var(--color-gold)]">
-                     <Calendar size={18} className="group-hover:scale-110 transition-transform duration-300" />
-                   </div>
-                   <div className="space-y-0.5">
-                     <span className="text-[9px] uppercase font-bold text-[var(--color-gold)] tracking-wider block">التقويم الهجري اليومي</span>
-                     <span className="text-xs font-black text-white">{todayHijri.formattedAr}</span>
-                   </div>
-                 </div>
-
-                 {todayReminders.length > 0 ? (
-                   <div className="flex-1 hidden sm:flex items-center gap-2 justify-end text-right">
-                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                     <span className="text-[11px] font-bold text-slate-100 line-clamp-1">
-                       {todayReminders[0].badge} : {todayReminders[0].title}
-                     </span>
-                   </div>
-                 ) : (
-                   <div className="flex-1 hidden sm:flex items-center gap-1.5 justify-end text-slate-300 text-[10px] font-bold">
-                     <Sparkles size={11} className="text-[var(--color-gold)]" />
-                     <span>اضغط للأدعية والفضائل اليومية</span>
-                   </div>
-                 )}
-
-                 <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 group-hover:bg-white/10 text-white/50 group-hover:text-white transition-all">
-                   <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform duration-300" />
-                 </div>
+               {/* Prayer Times Widget */}
+               <div className="mb-8 mx-auto max-w-2xl">
+                 <PrayerTimesWidget 
+                   settings={settings} 
+                   onUpdateSettings={setSettings} 
+                 />
                </div>
 
                <div className="mb-5 text-center relative">
@@ -797,11 +774,7 @@ const App: React.FC = () => {
                </div>
 
                {/* Professional Status Grid Panels */}
-               <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 my-8">
-                 <PrayerTimesWidget 
-                   settings={settings} 
-                   onUpdateSettings={setSettings} 
-                 />
+               <div className="max-w-2xl mx-auto my-8">
                  <DailyVerse />
                </div>
 
@@ -813,45 +786,51 @@ const App: React.FC = () => {
                  </div>
                  
                  <div className="quick-actions-grid">
-                   <div className="action-card group" onClick={() => setIsHijriOpen(true)}>
-                     <div className="action-card-icon group-hover:scale-110 transition-transform text-[var(--color-gold)]">
-                       <Calendar size={24} />
+                   <div className="action-card hijri group" onClick={() => setIsHijriOpen(true)}>
+                     <div className="action-card-icon group-hover:scale-110 transition-transform">
+                       <Calendar size={18} />
                      </div>
                      <span className="action-card-title">التقويم الهجري</span>
                    </div>
-                   <div className="action-card group" onClick={() => setIsAdhkarOpen(true)}>
+                   <div className="action-card agri group" onClick={() => setIsAgriCalendarOpen(true)}>
+                     <div className="action-card-icon group-hover:scale-110 transition-transform">
+                       <Leaf size={18} />
+                     </div>
+                     <span className="action-card-title">التقويم الزراعي</span>
+                   </div>
+                   <div className="action-card adhkar group" onClick={() => setIsAdhkarOpen(true)}>
                      <div className="action-card-icon group-hover:rotate-12 transition-transform">
-                       <BookOpen size={24} />
+                       <BookOpen size={18} />
                      </div>
                      <span className="action-card-title">الأذكار</span>
                    </div>
-                   <div className="action-card group" onClick={() => setIsTasbihOpen(true)}>
+                   <div className="action-card tasbih group" onClick={() => setIsTasbihOpen(true)}>
                      <div className="action-card-icon group-hover:scale-110 transition-transform">
-                       <Plus size={24} />
+                       <Plus size={18} />
                      </div>
                      <span className="action-card-title">المسبحة</span>
                    </div>
-                   <div className="action-card group" onClick={() => setIsNamesOfAllahOpen(true)}>
-                     <div className="action-card-icon group-hover:-rotate-12 transition-transform">
-                       <Key size={24} />
-                     </div>
-                     <span className="action-card-title">أسماء الله</span>
-                   </div>
-                   <div className="action-card group" onClick={() => setIsQiblaOpen(true)}>
+                   <div className="action-card qibla group" onClick={() => setIsQiblaOpen(true)}>
                      <div className="action-card-icon group-hover:rotate-45 transition-transform">
-                       <Compass size={24} />
+                       <Compass size={18} />
                      </div>
                      <span className="action-card-title">القبلة</span>
                    </div>
-                   <div className="action-card group" onClick={() => setIsZakatOpen(true)}>
+                   <div className="action-card zakat group" onClick={() => setIsZakatOpen(true)}>
                      <div className="action-card-icon group-hover:-translate-y-1 transition-transform">
-                       <Calculator size={24} />
+                       <Calculator size={18} />
                      </div>
                      <span className="action-card-title">الزكاة</span>
                    </div>
-                   <div className="action-card group" onClick={() => setIsBookmarksOpen(true)}>
+                   <div className="action-card names group" onClick={() => setIsNamesOfAllahOpen(true)}>
+                     <div className="action-card-icon group-hover:-rotate-12 transition-transform">
+                       <Key size={18} />
+                     </div>
+                     <span className="action-card-title">أسماء الله</span>
+                   </div>
+                   <div className="action-card bookmarks group" onClick={() => setIsBookmarksOpen(true)}>
                      <div className="action-card-icon group-hover:translate-y-[-4px] transition-transform">
-                       <BookmarkIcon size={24} />
+                       <BookmarkIcon size={18} />
                      </div>
                      <span className="action-card-title">المحفوظات</span>
                    </div>
@@ -890,6 +869,7 @@ const App: React.FC = () => {
         onOpenQibla={() => setIsQiblaOpen(true)}
         onOpenZakat={() => setIsZakatOpen(true)}
         onOpenHijri={() => setIsHijriOpen(true)}
+        onOpenAgriCalendar={() => setIsAgriCalendarOpen(true)}
         userInfo={settings}
         onShowToast={showToast}
       />
@@ -916,6 +896,11 @@ const App: React.FC = () => {
       <ZakatCalculatorModal
         isOpen={isZakatOpen}
         onClose={() => setIsZakatOpen(false)}
+      />
+
+      <AgriculturalCalendarModal
+        isOpen={isAgriCalendarOpen}
+        onClose={() => setIsAgriCalendarOpen(false)}
       />
 
       <AdhkarModal 

@@ -141,8 +141,8 @@ body {
 
 .quick-actions-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+  gap: 0.75rem;
 }
 
 .action-card {
@@ -150,44 +150,122 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
-  background-color: rgba(255, 255, 255, 0.05);
+  gap: 0.45rem;
+  background: rgba(255, 255, 255, 0.02);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 1.5rem;
-  padding: 1.5rem 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 1rem;
+  padding: 0.85rem 0.35rem;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.action-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, var(--card-glow, rgba(197, 160, 89, 0.15)), transparent 70%);
+  opacity: 0.5;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+.action-card:hover::before {
+  opacity: 1;
 }
 
 .action-card:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-color: var(--color-gold);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 0 15px rgba(212, 175, 55, 0.2);
-  transform: translateY(-4px);
+  background-color: rgba(255, 255, 255, 0.06);
+  border-color: var(--card-border, rgba(197, 160, 89, 0.4));
+  box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.4), 0 0 12px var(--card-glow-shadow, rgba(197, 160, 89, 0.15));
+  transform: translateY(-2px);
+}
+
+.action-card.hijri {
+  --card-glow: rgba(197, 160, 89, 0.15);
+  --card-border: rgba(197, 160, 89, 0.4);
+  --card-glow-shadow: rgba(197, 160, 89, 0.2);
+}
+
+.action-card.agri {
+  --card-glow: rgba(16, 185, 129, 0.15);
+  --card-border: rgba(16, 185, 129, 0.4);
+  --card-glow-shadow: rgba(16, 185, 129, 0.2);
+}
+
+.action-card.adhkar {
+  --card-glow: rgba(20, 184, 166, 0.15);
+  --card-border: rgba(20, 184, 166, 0.4);
+  --card-glow-shadow: rgba(20, 184, 166, 0.2);
+}
+
+.action-card.tasbih {
+  --card-glow: rgba(245, 158, 11, 0.15);
+  --card-border: rgba(245, 158, 11, 0.4);
+  --card-glow-shadow: rgba(245, 158, 11, 0.2);
+}
+
+.action-card.qibla {
+  --card-glow: rgba(99, 102, 241, 0.15);
+  --card-border: rgba(99, 102, 241, 0.4);
+  --card-glow-shadow: rgba(99, 102, 241, 0.2);
+}
+
+.action-card.zakat {
+  --card-glow: rgba(239, 68, 68, 0.12);
+  --card-border: rgba(239, 68, 68, 0.35);
+  --card-glow-shadow: rgba(239, 68, 68, 0.15);
+}
+
+.action-card.names {
+  --card-glow: rgba(168, 85, 247, 0.15);
+  --card-border: rgba(168, 85, 247, 0.4);
+  --card-glow-shadow: rgba(168, 85, 247, 0.2);
+}
+
+.action-card.bookmarks {
+  --card-glow: rgba(236, 72, 153, 0.15);
+  --card-border: rgba(236, 72, 153, 0.4);
+  --card-glow-shadow: rgba(236, 72, 153, 0.2);
 }
 
 .action-card-icon {
-  width: 3.5rem;
-  height: 3.5rem;
-  border-radius: 1.25rem;
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.05));
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
   color: var(--color-gold);
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(212, 175, 55, 0.2);
-  box-shadow: inset 0 0 10px rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.action-card:hover .action-card-icon {
+  background: linear-gradient(135deg, var(--card-border, rgba(197, 160, 89, 0.25)), rgba(255, 255, 255, 0.02));
+  color: #fff;
+  border-color: var(--card-border, var(--color-gold));
 }
 
 .action-card-title {
-  font-size: 0.875rem;
-  font-weight: 700;
+  font-size: 0.75rem;
+  font-weight: 600;
   color: var(--color-gold-light);
   text-align: center;
   display: block;
   width: 100%;
+  z-index: 1;
+  transition: color 0.25s ease;
+}
+
+.action-card:hover .action-card-title {
+  color: #ffffff;
 }
 
 .quran-text {

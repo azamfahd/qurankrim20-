@@ -1,5 +1,5 @@
 import React from 'react';
-import { Settings, History, PlusCircle, X, User, Heart, Bookmark as BookmarkIcon, SunMoon, BookOpenText, Share2, Compass, Calculator, Download, MonitorCheck, Calendar } from 'lucide-react';
+import { Settings, History, PlusCircle, X, User, Heart, Bookmark as BookmarkIcon, SunMoon, BookOpenText, Share2, Compass, Calculator, Download, MonitorCheck, Calendar, Leaf } from 'lucide-react';
 import { UserSettings } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -16,6 +16,7 @@ interface SidebarProps {
   onOpenQibla: () => void;
   onOpenZakat: () => void;
   onOpenHijri: () => void;
+  onOpenAgriCalendar: () => void;
   userInfo: UserSettings;
   onShowToast: (message: string, type?: 'success' | 'error' | 'info') => void;
 }
@@ -33,6 +34,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenQibla,
   onOpenZakat,
   onOpenHijri,
+  onOpenAgriCalendar,
   userInfo,
   onShowToast
 }) => {
@@ -153,6 +155,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
               />
 
               <SidebarItem 
+                icon={<Leaf size={20} />} 
+                label="التقويم الزراعي والمواسم" 
+                onClick={() => { onOpenAgriCalendar(); onClose(); }} 
+              />
+
+              <SidebarItem 
                 icon={<Heart size={20} />} 
                 label="المسبحة الإلكترونية" 
                 onClick={() => { onOpenTasbih(); onClose(); }} 
@@ -196,11 +204,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
 
             {/* Footer */}
-            <div className="p-4 text-center border-t border-[var(--color-border)] bg-gray-50/50">
+            <div className="p-4 text-center border-t border-[var(--color-border)] bg-gray-50/50 space-y-0.5">
               <p className="text-xs text-[var(--color-primary)] font-bold">
                 أنيس القلوب - رفيقك القرآني
               </p>
-              <p className="text-[10px] text-gray-400 mt-1">
+              <p className="text-[10px] text-gray-400">
+                إعداد المهندس/ عزام فهد
+              </p>
+              <p className="text-[10px] text-gray-400/80">
                 الإصدار 1.1.0
               </p>
             </div>

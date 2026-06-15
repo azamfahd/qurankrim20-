@@ -172,11 +172,13 @@ export class QuranChatSession {
             properties: {
               surahNumber: { type: Type.INTEGER },
               ayahNumber: { type: Type.INTEGER },
+              arabicText: { type: Type.STRING, description: "نص الآية الكريمة بالكامل بشكل دقيق بالرسم العثماني أو الإملائي الصحيح كنسخة احتياطية سريعة وموثوقة." },
               tafsir: { type: Type.STRING, description: "التفسير: تفسير دقيق، شامل، وموثوق للآية بأسلوب احترافي يربط المعنى اللغوي بالسياق العام. لا تقيد نفسك بطول معين، اشرح بعمق." },
               tadabbur: { type: Type.STRING, description: "التدبر: استنباط ذكي وإسقاط واقعي للآية على حالة المستخدم أو سؤاله. يجب أن يكون التحليل عميقاً، يربط حكمة القرآن بالواقع المعاصر والتحديات الشخصية." },
             },
+            required: ["surahNumber", "ayahNumber", "arabicText", "tafsir", "tadabbur"]
           },
-          description: "قائمة بالآيات القرآنية الأكثر صلة (أرقام السور والآيات). اختر الآيات بذكاء شديد لتغطي جوانب السؤال المختلفة (من 1 إلى 10 آيات أو أكثر حسب الحاجة).",
+          description: "قائمة بالآيات القرآنية الأكثر صلة (أرقام السور والآيات والنص والتحليل). اختر الآيات بذكاء شديد لتغطي جوانب السؤال المختلفة (من 1 إلى 10 آيات أو أكثر حسب الحاجة).",
         },
         tafakkur: {
           type: Type.STRING,
@@ -198,6 +200,12 @@ export class QuranChatSession {
       You act as a "Master of Quranic Semantics" and an "Expert Spiritual Analyst". You do NOT generate the Arabic text of the Quran yourself. 
       Your primary task is to perform an exceptionally deep, intelligent exploration of the user's prompt, deconstruct their core need or question, and map it to the MOST relevant Surah and Ayah numbers with profound explanations.
       
+      THEOLOGICAL RIGOR & SAFEGUARDS (ضوابط شرعية صارمة وحذر شديد):
+      1. **Al-Mohkam and Al-Mutashabeh (المحكم والمتشابه)**: You must handle the Quranic verses with utmost respect and strict caution. Keep clear boundaries between definitive (محكم) legislative verses and metaphorical/ambiguous (متشابه) verses. Do NOT build arbitrary rulings or allegorical interpretations on ambiguous verses.
+      2. **Strict Reliance on Academic Tafsir (الاعتماد على التفاسير المعتمدة)**: Your explanations must strictly align with standard mainstream Islamic scholarship (e.g., Tafsir Ibn Kathir, Al-Sa'di, Al-Qurtubi, Al-Tabari). NEVER make up interpretations or guess the meanings of verses out of context.
+      3. **No Unlicensed Fatwa or Legislate (عدم الفتوى بغير علم)**: Respect the absolute boundaries of Allah (حدود الله). If the user asks about definitive legislative rulings (أحكام الفقه الحلال والحرام والحدود), clearly provide the standard traditional consensus and politely advise them to consult official Islamic scholarly bodies or trusted grand muftis for personal fatwas. Do not issue independent legislative rulings.
+      4. **Purity of Tadabbur (التدبر السليم)**: Ensure that your spiritual and psychological analysis (Tadabbur) is pure, safe, and aligned with standard prophetic guidance and moderate theology. Avoid any philosophical deviance or arbitrary distortion of Quranic messages.
+      
       CONVERSATIONAL CONTEXT:
       You are engaging in a continuous conversation. The user may ask follow-up questions, ask for clarifications, or expand on their previous thoughts. ALWAYS analyze the user's prompt in the context of the previous messages. If the user says "وضح أكثر" (explain more) or "وماذا عن كذا" (what about...), refer back to your previous answer and build upon it seamlessly.
 
@@ -210,11 +218,13 @@ export class QuranChatSession {
       - tafakkur: Empty string "".
       - summary: Empty string "".
 
-      Intelligence & Professionalism Guidelines:
-      1. **Deep Analytical Understanding**: Do not just give surface-level answers. Analyze the "why" behind the user's question. Understand the psychological, spiritual, or intellectual root of their inquiry and address it directly.
-      2. **Highly Professional Tone**: Your language must be sophisticated, articulate, and authoritative, yet deeply empathetic and accessible. Use high-tier Arabic phrasing (فصحى بليغة ومعاصرة).
-      3. **Structured & Logical Argumentation**: Build your response logically. Start with a strong analytical introduction, support it with precise Quranic evidence (Tafsir and Tadabbur), and conclude with actionable wisdom (Tafakkur).
-      4. **Contextual Precision**: Tailor the depth and tone exactly to the user's input. If it's an intellectual question, be academic and philosophical. If it's an emotional plea, be deeply comforting and psychologically astute.
+      Intelligence & Professionalism Guidelines (سهولة الفهم والبلاغة الرقمية):
+      1. **Deep Analytical Understanding (الفهم التحليلي العميق)**: Do not just give surface-level answers. Analyze the "why" behind the user's question. Understand the psychological, spiritual, or intellectual root of their inquiry and address it directly.
+      2. **Clarity & Ease of Comprehension (وضوح الشرح وسهولة الفهم)**: Deliver information in an incredibly clear, structured, and easy-to-understand manner. Avoid overly complex, convoluted theological jargon that might confuse a layperson. Use a pedagogy that breaks down grand spiritual concepts into beautiful, relatable, and crystal-clear insights.
+      3. **Contemporary Relevance & Scientific Miracles (الربط بالواقع المعاصر والإعجاز العلمي والمنطقي)**: احرص دائماً على ربط إجاباتك وتحليلك للآيات بالواقع المعاصر الذي نعيشه والحياة اليومية للمستخدم لتوثيق الصلة وتقديم حلول عقلانية. وإذا كان في الآيات المختارة إعجاز علمي (كلك أو طبي أو كوني) أو حكمة علمية/تجريبية مثبتة، فقم ببيانها بأسلوب عقلي رصين ومقنع يبرز الإعجاز ويوضح الأثر الواقعي والملموس لهذه النظريات والتعاليم من الناحية العقلية والروحية.
+      4. **Highly Professional & Royal Tone (الأسلوب الراقي البليغ)**: Your language must be sophisticated, articulate, and authoritative, yet deeply empathetic and highly accessible. Use high-tier, seamless classical Arabic phrasing (فصحى بليغة ومعاصرة).
+      5. **Structured & Logical Flow (التسلسل المنطقي)**: Build your response logically so it flows naturally. Start with a strong, comforting analytical introduction, support it with precise Quranic evidence (Tafsir and Tadabbur) that is easy to absorb, and conclude with actionable, smart wisdom (Tafakkur).
+      6. **Contextual Precision (الدقة السياقية والذكاء الشعوري)**: Tailor the depth and tone exactly to the user's input. If it's an intellectual question, be academic yet crystal-clear. If it's an emotional plea, be deeply comforting, supportive, and psychologically astute.
       
       Response Structure (Hierarchical Pyramid):
       1. **Title (title)**: A profound, professional title capturing the essence of the response.
@@ -250,10 +260,11 @@ export class QuranChatSession {
     let response: GenerateContentResponse | null = null;
     let lastError: any = null;
     const maxRetries = 3;
+    const timeoutMs = 60000; // 60 seconds timeout to force failing fast rather than hanging infinitely
     
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
-        response = await this.ai.models.generateContent({
+        const generationPromise = this.ai.models.generateContent({
           model: this.model,
           contents: contents,
           config: {
@@ -266,13 +277,25 @@ export class QuranChatSession {
             }
           },
         });
+
+        // Race the Gemini call with a strict timeout
+        const timeoutPromise = new Promise<never>((_, reject) => 
+          setTimeout(() => reject(new Error("استغرق خادم الذكاء الاصطناعي وقتاً طويلاً للرد (انتهت المهلة).")), timeoutMs)
+        );
+
+        response = await Promise.race([generationPromise, timeoutPromise]);
         break; // Success, exit retry loop
       } catch (error: any) {
         lastError = error;
         console.warn(`Gemini API attempt ${attempt + 1} failed:`, error);
         
-        // Don't retry on quota or invalid key errors
-        if (error.message?.includes("quota") || error.message?.toLowerCase().includes("api key")) {
+        // Don't retry on quota/invalid API key/auth errors
+        if (
+          error.message?.includes("quota") || 
+          error.message?.toLowerCase().includes("api key") || 
+          error.message?.includes("429") || 
+          error.message?.includes("403")
+        ) {
           throw error;
         }
         
@@ -357,9 +380,13 @@ export class QuranChatSession {
               QuranDataService.fetchSurahName(mapping.surahNumber)
             ]);
             
+            // If the verified API failed (returned empty string) or timed out, 
+            // seamlessly fall back to the backup arabicText generated by Gemini!
+            const finalArabicText = arabicText || mapping.arabicText || "عذراً، تعذر جلب نص الآية الكريمة.";
+            
             return {
-              text: arabicText, // Required by Verse interface
-              arabicText,
+              text: finalArabicText, // Required by Verse interface
+              arabicText: finalArabicText,
               surah: surahName, // Required by Verse interface
               surahName,
               number: mapping.ayahNumber, // Required by Verse interface
@@ -369,9 +396,21 @@ export class QuranChatSession {
               tadabbur: mapping.tadabbur,
             };
           } catch (e) {
-            console.error(`Failed to verify verse ${mapping.surahNumber}:${mapping.ayahNumber}`, e);
-            // Fallback if API fails, though we prefer verification
-            return null;
+            console.error(`Failed to verify or retrieve verse ${mapping.surahNumber}:${mapping.ayahNumber}`, e);
+            // Fall back immediately to mapping values to prevent dropping any verses!
+            const fallbackSurah = await QuranDataService.fetchSurahName(mapping.surahNumber);
+            const fallbackText = mapping.arabicText || "عذراً، تعذر جلب نص الآية الكريمة.";
+            return {
+              text: fallbackText,
+              arabicText: fallbackText,
+              surah: fallbackSurah,
+              surahName: fallbackSurah,
+              number: mapping.ayahNumber,
+              surahNumber: mapping.surahNumber,
+              ayahNumber: mapping.ayahNumber,
+              tafsir: mapping.tafsir,
+              tadabbur: mapping.tadabbur,
+            };
           }
         })
       ).then(results => results.filter(v => v !== null) as Verse[]);

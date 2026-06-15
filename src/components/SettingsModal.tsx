@@ -356,9 +356,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 إلغاء
               </button>
             </div>
-            <div className="text-center">
+            <div className="text-center space-y-0.5">
               <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
                 أنيس القلوب - الإصدار 1.1.0
+              </p>
+              <p className="text-[10px] text-[#043d2e]/60 font-black">
+                إعداد: المهندس/ عزام فهد
               </p>
             </div>
           </div>

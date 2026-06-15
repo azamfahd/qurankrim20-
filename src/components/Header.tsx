@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, User, Calendar, Moon, RefreshCw, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getCurrentHijriDate } from '../utils/hijri';
 
 interface HeaderProps {
   onOpenSidebar: () => void;
@@ -10,19 +11,37 @@ interface HeaderProps {
   lastSynced?: number | null;
 }
 
+const toArabicNumbers = (str: string): string => {
+  const map: Record<string, string> = {
+    '0': '٠', '1': '١', '2': '٢', '3': '٣', '4': '٤',
+    '5': '٥', '6': '٦', '7': '٧', '8': '٨', '9': '٩'
+  };
+  return str.replace(/[0-9]/g, w => map[w] || w);
+};
+
 const Header = React.memo<HeaderProps>(({ onOpenSidebar, onOpenSettings, username, isSyncing, lastSynced }) => {
   const [hijriDate, setHijriDate] = useState<string>('');
+  const [gregorianDate, setGregorianDate] = useState<string>('');
+  const [agriMonth, setAgriMonth] = useState<string>('');
 
   useEffect(() => {
     try {
-      const date = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-uma', {
+      const today = new Date();
+      
+      const hijriObj = getCurrentHijriDate();
+      setHijriDate(toArabicNumbers(hijriObj.formattedAr));
+
+      const greg = new Intl.DateTimeFormat('ar-u-ca-gregory', {
         day: 'numeric',
         month: 'long',
         year: 'numeric'
-      }).format(new Date());
-      setHijriDate(date);
+      }).format(today);
+      setGregorianDate(greg);
+
+      const agriMonths = ["كانون الثاني", "شباط", "آذار", "نيسان", "أيار", "حزيران", "تموز", "آب", "أيلول", "تشرين الأول", "تشرين الثاني", "كانون الأول"];
+      setAgriMonth(agriMonths[today.getMonth()]);
     } catch (e) {
-      console.error("Hijri date formatting not supported", e);
+      console.error("Date formatting not supported", e);
     }
   }, []);
 
@@ -46,9 +65,13 @@ const Header = React.memo<HeaderProps>(({ onOpenSidebar, onOpenSettings, usernam
             <Moon size={16} className="text-[var(--color-gold)]" />
             <h1 className="text-xl font-black royal-text-gradient leading-tight tracking-tight">أنيس القلوب</h1>
           </div>
-          <div className="flex items-center gap-1.5 text-[10px] text-[var(--color-gold-light)] font-semibold mt-0.5 opacity-80">
-            <Calendar size={10} className="text-[var(--color-gold)]" />
+          <div className="flex items-center gap-1.5 text-[10px] text-[var(--color-gold-light)] font-semibold mt-0.5 opacity-80 flex-wrap">
+            <Calendar size={10} className="text-[var(--color-gold)] shrink-0" />
+            <span>{gregorianDate}</span>
+            <span className="opacity-40">•</span>
             <span>{hijriDate}</span>
+            <span className="opacity-40">•</span>
+            <span className="text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/15">الزراعي: {agriMonth}</span>
           </div>
         </div>
       </div>
