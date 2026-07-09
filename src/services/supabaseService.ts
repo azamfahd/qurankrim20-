@@ -35,6 +35,28 @@ export class SupabaseService {
   private static TABLE_SETTINGS = 'user_settings';
   private static TABLE_BOOKMARKS = 'bookmarks';
 
+  private static logError(context: string, error: any) {
+    if (!error) return;
+    const errMsg = error.message || String(error);
+    const errCode = error.code || '';
+    
+    // PGRST116 is a "no rows returned" response for .single(), which is not an error we need to warn about
+    if (errCode === 'PGRST116') return;
+
+    if (
+      errCode === '42P01' || 
+      errMsg.includes('does not exist') || 
+      errMsg.includes('JWT') ||
+      errMsg.includes('API key') ||
+      errMsg.includes('network') ||
+      errMsg.includes('fetch')
+    ) {
+      console.warn(`[Supabase Safe Check] ${context} (This is normal if tables/auth are not yet configured in Supabase):`, errMsg);
+    } else {
+      console.warn(`[Supabase Service Warning] ${context}:`, error);
+    }
+  }
+
   static async signInWithGoogle() {
     const client = getSupabase();
     if (!client) throw new Error("Supabase client not initialized");
@@ -81,7 +103,7 @@ export class SupabaseService {
           });
       }
     } catch (error) {
-      console.error('Error in saveSessions:', error);
+      this.logError('saveSessions', error);
     }
   }
 
@@ -106,7 +128,7 @@ export class SupabaseService {
         messages: typeof item.messages === 'string' ? JSON.parse(item.messages) : item.messages,
       }));
     } catch (error) {
-      console.error('Error loading chat sessions:', error);
+      this.logError('loadSessions', error);
       return null;
     }
   }
@@ -132,7 +154,7 @@ export class SupabaseService {
           last_updated: settings.lastUpdated || new Date().toISOString()
         });
     } catch (error) {
-      console.error('Error saving user settings:', error);
+      this.logError('saveUserSettings', error);
     }
   }
 
@@ -162,7 +184,7 @@ export class SupabaseService {
         lastUpdated: data.last_updated
       };
     } catch (error) {
-      console.error('Error loading user settings:', error);
+      this.logError('loadUserSettings', error);
       return null;
     }
   }
@@ -177,7 +199,7 @@ export class SupabaseService {
         .delete()
         .eq('id', sessionId);
     } catch (error) {
-      console.error('Error deleting session:', error);
+      this.logError('deleteSession', error);
     }
   }
 
@@ -192,7 +214,7 @@ export class SupabaseService {
         .delete()
         .eq('user_id', userId);
     } catch (error) {
-      console.error('Error clearing sessions:', error);
+      this.logError('clearAllSessions', error);
     }
   }
 
@@ -211,7 +233,7 @@ export class SupabaseService {
           date_added: bookmark.dateAdded,
         });
     } catch (error) {
-      console.error('Error saving bookmark:', error);
+      this.logError('saveBookmark', error);
     }
   }
 
@@ -246,7 +268,7 @@ export class SupabaseService {
         };
       });
     } catch (error) {
-      console.error('Error fetching bookmarks:', error);
+      this.logError('getBookmarks', error);
       return [];
     }
   }
@@ -263,7 +285,7 @@ export class SupabaseService {
         .eq('id', bookmarkId)
         .eq('user_id', userId);
     } catch (error) {
-      console.error('Error deleting bookmark:', error);
+      this.logError('deleteBookmark', error);
     }
   }
 
@@ -287,7 +309,7 @@ export class SupabaseService {
           last_updated: new Date().toISOString()
         });
     } catch (error) {
-      console.error('Error registering user in Supabase:', error);
+      this.logError('registerUser', error);
     }
   }
 
@@ -305,7 +327,7 @@ export class SupabaseService {
         })
         .eq('user_id', userId);
     } catch (error) {
-      console.error('Error updating install status in Supabase:', error);
+      this.logError('updateUserInstallStatus', error);
     }
   }
 }

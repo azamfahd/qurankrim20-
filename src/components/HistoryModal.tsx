@@ -20,6 +20,134 @@ const toArabicNumbers = (str: string): string => {
   return str.replace(/[0-9]/g, w => map[w] || w);
 };
 
+const normalizeText = (text: string): string => {
+  if (!text) return '';
+  let normalized = text.toLowerCase();
+  // Remove Arabic diacritics (Tashkeel)
+  normalized = normalized.replace(/[\u064B-\u065F]/g, "");
+  // Normalize Alef shapes
+  normalized = normalized.replace(/[أإآا]/g, "ا");
+  // Normalize Taa Marbutah
+  normalized = normalized.replace(/ة/g, "ه");
+  // Normalize Yaa shapes
+  normalized = normalized.replace(/[ىي]/g, "ي");
+  return normalized;
+};
+
+const getNormalizedMapping = (text: string): { normalized: string; map: number[] } => {
+  let normalized = '';
+  const map: number[] = [];
+  
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    const isDiacritic = /[\u064B-\u065F]/.test(char);
+    if (isDiacritic) {
+      continue;
+    }
+    
+    let normalizedChar = char.toLowerCase();
+    if (/[أإآا]/.test(normalizedChar)) {
+      normalizedChar = 'ا';
+    } else if (normalizedChar === 'ة') {
+      normalizedChar = 'ه';
+    } else if (/[ىي]/.test(normalizedChar)) {
+      normalizedChar = 'ي';
+    }
+    
+    normalized += normalizedChar;
+    map.push(i);
+  }
+  
+  return { normalized, map };
+};
+
+const highlightText = (text: string, query: string): React.ReactNode => {
+  if (!query.trim() || !text) return text;
+  
+  const { normalized: normalizedText, map } = getNormalizedMapping(text);
+  const normalizedQuery = normalizeText(query);
+  
+  if (!normalizedQuery || !normalizedText.includes(normalizedQuery)) {
+    return text;
+  }
+  
+  const queryLen = normalizedQuery.length;
+  const elements: React.ReactNode[] = [];
+  let currentIndex = 0;
+  let textIndex = 0;
+  
+  while (currentIndex < normalizedText.length) {
+    const remainingNormalized = normalizedText.slice(currentIndex);
+    const matchIndex = remainingNormalized.indexOf(normalizedQuery);
+    
+    if (matchIndex === -1) {
+      elements.push(text.slice(textIndex));
+      break;
+    }
+    
+    const matchStartInNormalized = currentIndex + matchIndex;
+    const matchEndInNormalized = matchStartInNormalized + queryLen;
+    
+    const origStart = map[matchStartInNormalized];
+    const origEnd = matchEndInNormalized < map.length ? map[matchEndInNormalized] : text.length;
+    
+    if (origStart > textIndex) {
+      elements.push(text.slice(textIndex, origStart));
+    }
+    
+    elements.push(
+      <mark key={origStart} className="bg-amber-100 text-[#043d2e] rounded px-1 font-bold border-b border-amber-300">
+        {text.slice(origStart, origEnd)}
+      </mark>
+    );
+    
+    currentIndex = matchEndInNormalized;
+    textIndex = origEnd;
+  }
+  
+  return <>{elements}</>;
+};
+
+interface MessageSnippet {
+  text: string;
+  role: 'user' | 'assistant';
+}
+
+const getMessageSnippet = (messages: any[], query: string): MessageSnippet | null => {
+  if (!query.trim() || !messages || messages.length === 0) return null;
+  
+  const normalizedQuery = normalizeText(query);
+  if (!normalizedQuery) return null;
+  
+  for (const msg of messages) {
+    const content = msg.content || '';
+    const { normalized: normalizedContent, map } = getNormalizedMapping(content);
+    
+    const matchIndex = normalizedContent.indexOf(normalizedQuery);
+    if (matchIndex !== -1) {
+      const origStart = map[matchIndex];
+      
+      const startPos = Math.max(0, origStart - 45);
+      const endPos = Math.min(content.length, origStart + normalizedQuery.length + 55);
+      
+      let snippet = content.slice(startPos, endPos);
+      if (startPos > 0) {
+        snippet = '...' + snippet;
+      }
+      if (endPos < content.length) {
+        snippet = snippet + '...';
+      }
+      
+      return {
+        text: snippet,
+        role: msg.role || 'user'
+      };
+    }
+  }
+  
+  return null;
+};
+
 export const HistoryModal: React.FC<HistoryModalProps> = ({ 
   isOpen, 
   onClose, 
@@ -46,12 +174,16 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
   };
 
   const filteredSessions = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
+    const q = searchQuery.trim();
     if (!q) return sessions;
+    
+    const normalizedQuery = normalizeText(q);
+    if (!normalizedQuery) return sessions;
+
     return sessions.filter(session => {
-      const title = (session.title || session.preview || '').toLowerCase();
-      const messagesText = session.messages?.map(m => m.content || '').join(' ').toLowerCase() || '';
-      return title.includes(q) || messagesText.includes(q);
+      const title = normalizeText(session.title || session.preview || '');
+      const messagesText = session.messages?.map(m => normalizeText(m.content || '')).join(' ') || '';
+      return title.includes(normalizedQuery) || messagesText.includes(normalizedQuery);
     });
   }, [sessions, searchQuery]);
 
@@ -177,10 +309,23 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
                         </div>
                         
                         <div className="flex-1 min-w-0">
-                          <h4 className="text-xs font-bold text-gray-800 mb-1.5 leading-relaxed line-clamp-2 group-hover:text-[#043d2e] transition-colors duration-300">
-                            {session.title || session.preview || "حوار وتأمل قرآني"}
+                          <h4 className="text-xs font-bold text-gray-800 mb-1 leading-relaxed line-clamp-2 group-hover:text-[#043d2e] transition-colors duration-300">
+                            {highlightText(session.title || session.preview || "حوار وتأمل قرآني", searchQuery)}
                           </h4>
-                          <div className="flex items-center gap-3 text-[11px] text-gray-500 font-bold flex-wrap">
+                          
+                          {/* Intelligent matched snippet preview if query is entered */}
+                          {searchQuery && getMessageSnippet(session.messages || [], searchQuery) && (
+                            <div className="mt-1.5 p-2 bg-emerald-50/40 hover:bg-emerald-50/60 border border-emerald-100/50 rounded-xl text-[11px] text-gray-650 font-medium leading-normal transition-colors">
+                              <span className="text-[#043d2e] font-bold">
+                                {getMessageSnippet(session.messages || [], searchQuery)?.role === 'user' ? 'سؤالك: ' : 'المساعد: '}
+                              </span>
+                              <span className="text-gray-700">
+                                {highlightText(getMessageSnippet(session.messages || [], searchQuery)?.text || '', searchQuery)}
+                              </span>
+                            </div>
+                          )}
+
+                          <div className="flex items-center gap-3 text-[11px] text-gray-500 font-bold flex-wrap mt-2">
                             <span className="flex items-center gap-1.5">
                               <Calendar size={12} className="text-[#d4af37]" />
                               {formatDate(session.date)}
@@ -189,6 +334,15 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
                             <span className="text-[#043d2e] bg-[#043d2e]/5 px-2 py-0.5 rounded font-bold text-[10px]">
                               {messageCount === 1 ? 'سؤال واحد' : messageCount === 2 ? 'سؤال وجواب' : `${toArabicNumbers(messageCount.toString())} ردود`}
                             </span>
+                            {searchQuery && (
+                              <>
+                                <span className="opacity-30">•</span>
+                                <span className="text-[#d4af37] bg-[#d4af37]/5 border border-[#d4af37]/15 px-2 py-0.5 rounded font-bold text-[10px] flex items-center gap-1">
+                                  <Sparkles size={10} />
+                                  {normalizeText(session.title || session.preview || '').includes(normalizeText(searchQuery)) ? 'تطابق في العنوان' : 'تطابق في الرسائل'}
+                                </span>
+                              </>
+                            )}
                           </div>
                         </div>
 
