@@ -40,7 +40,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   username: '',
   email: '',
   isLoggedIn: false,
-  model: 'gemini-3-flash-preview', 
+  model: 'gemini-3.5-flash', 
   creativityLevel: 0.5,
   apiKey: '',
   bookmarks: [],

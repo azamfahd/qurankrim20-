@@ -228,7 +228,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       onChange={(e) => setLocalSettings({ ...localSettings, model: e.target.value as GeminiModel })}
                       className="w-full bg-gray-50/50 border border-[var(--color-border)] rounded-2xl py-3.5 pl-10 pr-12 text-sm focus:bg-white focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] focus:outline-none transition-all shadow-inner appearance-none cursor-pointer"
                     >
-                      <option value="gemini-3-flash-preview">Gemini 3 Flash (متوازن وسريع)</option>
+                      <option value="gemini-3.5-flash">Gemini 3.5 Flash (موصى به - مستقر وسريع جداً)</option>
+                      <option value="gemini-3-flash-preview">Gemini 3 Flash (متوازن وسريع - تجريبي)</option>
                       <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro (تفكير عميق ودقيق)</option>
                       <option value="gemini-3.1-flash-lite-preview">Gemini Flash Lite (الأسرع)</option>
                     </select>

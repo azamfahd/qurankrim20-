@@ -18,7 +18,7 @@ export class QuranChatSession {
       this.ai = new GoogleGenAI({ apiKey: this.apiKey });
     }
     
-    let selectedModel = settings.model || settings.geminiModel || 'gemini-3-flash-preview';
+    let selectedModel = settings.model || settings.geminiModel || 'gemini-3.5-flash';
     // Remove the restriction that forces gemini-3-flash-preview
     this.model = selectedModel;
   }
