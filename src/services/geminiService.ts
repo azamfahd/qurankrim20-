@@ -11,9 +11,10 @@ export class QuranChatSession {
   constructor(settings: UserSettings) {
     this.settings = settings;
     // Use user-provided key if available, otherwise use environment key
-    this.apiKey = settings.apiKey || process.env.GEMINI_API_KEY || (import.meta as any).env?.VITE_GEMINI_API_KEY || '';
+    const envGeminiKey = typeof process !== 'undefined' && process.env ? process.env.GEMINI_API_KEY : '';
+    this.apiKey = settings.apiKey || envGeminiKey || (import.meta as any).env?.VITE_GEMINI_API_KEY || '';
     
-    if (this.apiKey) {
+    if (this.apiKey && this.apiKey !== 'undefined' && this.apiKey !== 'null') {
       this.ai = new GoogleGenAI({ apiKey: this.apiKey });
     }
     

@@ -79,7 +79,11 @@ export class SupabaseService {
 
   static onAuthStateChange(callback: (user: any) => void) {
     const client = getSupabase();
-    if (!client) return { data: { subscription: { unsubscribe: () => {} } } };
+    if (!client) {
+      // Trigger callback with null asynchronously to let guest mode load
+      setTimeout(() => callback(null), 0);
+      return { data: { subscription: { unsubscribe: () => {} } } };
+    }
     return client.auth.onAuthStateChange((event, session) => {
       callback(session?.user || null);
     });
