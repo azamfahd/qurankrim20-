@@ -76,11 +76,24 @@ const VerseSection: React.FC<{
           const everyAyahReciters: Record<string, string> = {
             'ar.alafasy': 'Alafasy_128kbps',
             'ar.abdulsamad': 'Abdul_Basit_Murattal_192kbps',
+            'ar.abdulbasitmujawwad': 'Abdul_Basit_Mujawwad_128kbps',
             'ar.as-sudais': 'Abdurrahmaan_As-Sudais_192kbps',
             'ar.maheralmuaiqly': 'Maher_AlMuaiqly_64kbps',
             'ar.saadghamidi': 'Saad_Al-Ghamidi_128kbps',
             'ar.minshawi': 'Minshawy_Murattal_128kbps',
-            'ar.yasseraldosari': 'Yasser_Ad-Dussary_128kbps'
+            'ar.minshawimujawwad': 'Minshawy_Mujawwad_128kbps',
+            'ar.yasseraldosari': 'Yasser_Ad-Dussary_128kbps',
+            'ar.husary': 'Husary_128kbps',
+            'ar.husarymujawwad': 'Husary_Mujawwad_128kbps',
+            'ar.husarymuallim': 'Husary_Muallim_128kbps',
+            'ar.shuraym': 'Shuraym_128kbps',
+            'ar.ahmedajamy': 'Ahmed_ibn_Ali_al-Ajamy_128kbps',
+            'ar.faresabbad': 'Fares_Abbad_64kbps',
+            'ar.shaatree': 'Abu_Bakr_Ash-Shaatree_128kbps',
+            'ar.hudhaify': 'Hudhaify_64kbps',
+            'ar.ayyoub': 'Muhammad_Ayyoub_128kbps',
+            'ar.hanirifai': 'Hani_Rifai_192kbps',
+            'ar.mustafaismail': 'Mustafa_Ismail_48kbps',
           };
 
           if (!useFallback && everyAyahReciters[reciterId]) {

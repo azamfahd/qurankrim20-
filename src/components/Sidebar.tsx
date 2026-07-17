@@ -1,5 +1,5 @@
 import React from 'react';
-import { Settings, History, PlusCircle, X, User, Heart, Bookmark as BookmarkIcon, SunMoon, BookOpenText, Share2, Compass, Calculator, Download, MonitorCheck, Calendar, Leaf } from 'lucide-react';
+import { Settings, History, PlusCircle, X, User, Heart, Bookmark as BookmarkIcon, SunMoon, BookOpenText, Share2, Compass, Calculator, Download, MonitorCheck, Calendar, Leaf, Sparkles, MessageSquare } from 'lucide-react';
 import { UserSettings } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -17,6 +17,8 @@ interface SidebarProps {
   onOpenZakat: () => void;
   onOpenHijri: () => void;
   onOpenAgriCalendar: () => void;
+  onOpenAbout: () => void;
+  onOpenFeedback: () => void;
   userInfo: UserSettings;
   onShowToast: (message: string, type?: 'success' | 'error' | 'info') => void;
 }
@@ -35,6 +37,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenZakat,
   onOpenHijri,
   onOpenAgriCalendar,
+  onOpenAbout,
+  onOpenFeedback,
   userInfo,
   onShowToast
 }) => {
@@ -171,6 +175,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <span className="text-[10px] font-black text-[var(--color-gold-dark)] uppercase tracking-[0.2em]">المزيد</span>
                 <div className="h-px flex-1 bg-gradient-to-r from-[var(--color-gold)]/30 to-transparent"></div>
               </div>
+
+              <SidebarItem 
+                icon={<Sparkles size={20} />} 
+                label="لمحة عن البرنامج" 
+                onClick={() => { onOpenAbout(); onClose(); }} 
+              />
+
+              <SidebarItem 
+                icon={<MessageSquare size={20} />} 
+                label="اقتراح أو فكرة" 
+                onClick={() => { onOpenFeedback(); onClose(); }} 
+              />
 
               <SidebarItem 
                 icon={<Settings size={20} />} 

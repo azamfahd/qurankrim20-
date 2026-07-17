@@ -9,6 +9,8 @@ import { TasbihModal } from './components/TasbihModal';
 import { BookmarksModal } from './components/BookmarksModal';
 import { AdhkarModal } from './components/AdhkarModal';
 import { NamesOfAllahModal } from './components/NamesOfAllahModal';
+import { AboutModal } from './components/AboutModal';
+import { FeedbackModal } from './components/FeedbackModal';
 import { Toast, ToastType } from './components/Toast';
 import { Sidebar } from './components/Sidebar';
 import { DailyVerse } from './components/DailyVerse';
@@ -95,6 +97,8 @@ const App: React.FC = () => {
   const [isZakatOpen, setIsZakatOpen] = useState(false);
   const [isHijriOpen, setIsHijriOpen] = useState(false);
   const [isAgriCalendarOpen, setIsAgriCalendarOpen] = useState(false);
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [hijriOffset, setHijriOffset] = useState<number>(() => {
     try {
       const saved = localStorage.getItem('anis_hijri_offset');
@@ -144,6 +148,8 @@ const App: React.FC = () => {
         setIsQiblaOpen(false);
         setIsZakatOpen(false);
         setIsAgriCalendarOpen(false);
+        setIsAboutOpen(false);
+        setIsFeedbackOpen(false);
         setIsSidebarOpen(false);
       }
     };
@@ -834,6 +840,12 @@ const App: React.FC = () => {
                      </div>
                      <span className="action-card-title">المحفوظات</span>
                    </div>
+                   <div className="action-card about group" onClick={() => setIsAboutOpen(true)}>
+                     <div className="action-card-icon group-hover:scale-110 transition-transform">
+                       <Sparkles size={18} />
+                     </div>
+                     <span className="action-card-title">لمحة عن البرنامج</span>
+                   </div>
                  </div>
                </div>
              </div>
@@ -870,6 +882,8 @@ const App: React.FC = () => {
         onOpenZakat={() => setIsZakatOpen(true)}
         onOpenHijri={() => setIsHijriOpen(true)}
         onOpenAgriCalendar={() => setIsAgriCalendarOpen(true)}
+        onOpenAbout={() => setIsAboutOpen(true)}
+        onOpenFeedback={() => setIsFeedbackOpen(true)}
         userInfo={settings}
         onShowToast={showToast}
       />
@@ -975,6 +989,19 @@ const App: React.FC = () => {
             });
           }
         }}
+      />
+
+      <AboutModal 
+        isOpen={isAboutOpen} 
+        onClose={() => setIsAboutOpen(false)} 
+        onOpenFeedback={() => setIsFeedbackOpen(true)}
+      />
+
+      <FeedbackModal 
+        isOpen={isFeedbackOpen} 
+        onClose={() => setIsFeedbackOpen(false)} 
+        onShowToast={showToast}
+        userInfo={settings}
       />
 
       <Toast 

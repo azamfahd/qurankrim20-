@@ -249,14 +249,37 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       onChange={(e) => setLocalSettings({ ...localSettings, reciter: e.target.value })}
                       className="w-full bg-gray-50/50 border border-[var(--color-border)] rounded-2xl py-3.5 pl-10 pr-12 text-sm focus:bg-white focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] focus:outline-none transition-all shadow-inner appearance-none cursor-pointer"
                     >
-                      <option value="ar.alafasy">مشاري راشد العفاسي</option>
-                      <option value="ar.islamsobhi">إسلام صبحي</option>
-                      <option value="ar.yasseraldosari">ياسر الدوسري</option>
-                      <option value="ar.abdulsamad">عبد الباسط عبد الصمد</option>
-                      <option value="ar.as-sudais">عبد الرحمن السديس</option>
-                      <option value="ar.maheralmuaiqly">ماهر المعيقلي</option>
-                      <option value="ar.saadghamidi">سعد الغامدي</option>
-                      <option value="ar.minshawi">محمد صديق المنشاوي</option>
+                      <optgroup label="⭐ الأكثر شعبية واستماعاً" className="font-bold text-gray-800">
+                        <option value="ar.alafasy">مشاري راشد العفاسي</option>
+                        <option value="ar.yasseraldosari">ياسر الدوسري</option>
+                        <option value="ar.maheralmuaiqly">ماهر المعيقلي</option>
+                        <option value="ar.saadghamidi">سعد الغامدي</option>
+                      </optgroup>
+                      
+                      <optgroup label="📖 مدارس التلاوة الكلاسيكية والمجودين" className="font-bold text-gray-800">
+                        <option value="ar.minshawi">محمد صديق المنشاوي (مرتل)</option>
+                        <option value="ar.minshawimujawwad">محمد صديق المنشاوي (مجود)</option>
+                        <option value="ar.abdulsamad">عبد الباسط عبد الصمد (مرتل)</option>
+                        <option value="ar.abdulbasitmujawwad">عبد الباسط عبد الصمد (مجود)</option>
+                        <option value="ar.husary">محمود خليل الحصري (مرتل)</option>
+                        <option value="ar.husarymujawwad">محمود خليل الحصري (مجود)</option>
+                        <option value="ar.husarymuallim">محمود خليل الحصري (المعلم)</option>
+                        <option value="ar.mustafaismail">مصطفى إسماعيل</option>
+                      </optgroup>
+                      
+                      <optgroup label="🕋 أئمة الحرمين الشريفين" className="font-bold text-gray-800">
+                        <option value="ar.as-sudais">عبد الرحمن السديس</option>
+                        <option value="ar.shuraym">سعود الشريم</option>
+                        <option value="ar.hudhaify">علي عبد الرحمن الحذيفي</option>
+                        <option value="ar.ayyoub">محمد أيوب</option>
+                      </optgroup>
+                      
+                      <optgroup label="🎙️ نخبة من قراء العالم الإسلامي" className="font-bold text-gray-800">
+                        <option value="ar.ahmedajamy">أحمد بن علي العجمي</option>
+                        <option value="ar.faresabbad">فارس عباد</option>
+                        <option value="ar.shaatree">أبو بكر الشاطري</option>
+                        <option value="ar.hanirifai">هاني الرفاعي</option>
+                      </optgroup>
                     </select>
                     <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-gray-400 group-hover/select:text-[var(--color-primary)] transition-colors">
                       <Headphones size={18} />
