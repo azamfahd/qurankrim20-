@@ -18,8 +18,32 @@ export class QuranChatSession {
       this.ai = new GoogleGenAI({ apiKey: this.apiKey });
     }
     
-    let selectedModel = settings.model || settings.geminiModel || 'gemini-3.5-flash';
-    // Remove the restriction that forces gemini-3-flash-preview
+    // Check if the user is authenticated (logged in) or has provided a custom API key
+    const hasCustomKey = !!(settings.apiKey && settings.apiKey.trim().length > 0);
+    const isLogged = !!settings.isLoggedIn;
+    
+    // Determine the smart default model:
+    // Default to 'gemini-3-flash-preview' (the balanced, fast, and free model) as requested
+    const smartDefaultModel = 'gemini-3-flash-preview';
+    
+    // Fallback to the smart default model if no manual model is chosen or if it needs alignment
+    let selectedModel = settings.model || settings.geminiModel || smartDefaultModel;
+    
+    // Force downgrade of pro/paid choices to ensure no user is prompted for payment or gets billing blocks
+    if (selectedModel === 'gemini-3.1-pro-preview') {
+      selectedModel = 'gemini-3-flash-preview';
+    }
+    
+    // If guest tries to use a model, override with the robust and free 'gemini-3-flash-preview'
+    if (!isLogged && !hasCustomKey) {
+      selectedModel = 'gemini-3-flash-preview';
+    } else {
+      // Authenticated/custom key users can use whichever free model they choose, falling back to smartDefaultModel if not set
+      if (!selectedModel) {
+        selectedModel = 'gemini-3-flash-preview';
+      }
+    }
+    
     this.model = selectedModel;
   }
 
